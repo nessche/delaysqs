@@ -293,9 +293,9 @@ describe("delaysqs", function () {
             });
         });
 
-        it('should process all messages before polling again', function done() {
+        it('should process all messages before polling again', function (done) {
             
-            var deliveryTimestamp = now + 10;
+            var deliveryTimestamp = now;
             sqs.receiveMessage = sinon.stub().yields(null, {});
             sqs.receiveMessage.onFirstCall().yields(null,{Messages: [messageWithDeliveryTimestamp(deliveryTimestamp),
                 messageWithDeliveryTimestamp(deliveryTimestamp)]});
