@@ -8,7 +8,8 @@ var delaysqs = function (sqs, queueUrl, messageCallback, errorCallback) {
         var deliveryTimestamp = (message.MessageAttributes && message.MessageAttributes.deliveryTimestamp) ?
             parseInt(message.MessageAttributes.deliveryTimestamp.StringValue) : 0;
         if (deliveryTimestamp) {
-            var delay = deliveryTimestamp - new Date().getTime();
+            var now = Math.round(new Date().getTime() / 1000);
+            var delay = deliveryTimestamp - now;
             if (delay > 0) {
                 _resendToQueue(message, delay, next);
             } else {
@@ -37,7 +38,7 @@ var delaysqs = function (sqs, queueUrl, messageCallback, errorCallback) {
 
     var _resendToQueue = function(message, delay, next) {
 
-        var delayInSeconds = Math.min(Math.floor(delay / 1000), 900);
+        var delayInSeconds = Math.min(delay, 900);
         sqs.sendMessage({
             MessageBody: message.Body,
             DelaySeconds: delayInSeconds,
@@ -55,8 +56,9 @@ var delaysqs = function (sqs, queueUrl, messageCallback, errorCallback) {
     };
 
     var _enqueueMessage = function (payload, deliveryTimestamp, callback) {
-        var delay = deliveryTimestamp - new Date().getTime();
-        var delayInSeconds = Math.min(Math.floor(delay / 1000), 900);
+        var now = Math.round(new Date().getTime() / 1000);
+        var delay = deliveryTimestamp - now;
+        var delayInSeconds = Math.min(delay, 900);
         if (delay > 0) {
             sqs.sendMessage({
                 QueueUrl: queueUrl,
