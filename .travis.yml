@@ -4,3 +4,8 @@ node_js:
 - '0.11'
 - '0.10'
 script: "npm run coverage"
+addons:
+  code_climate:
+    repo_token: b597676ee62c80768dad22866566e4bb0886ab6f4fd7f49f18cdfffa870347b0
+after_script:
+  - codeclimate-test-reporter < lcov.info

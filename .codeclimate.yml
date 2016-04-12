@@ -1,2 +1,9 @@
 exclude_paths:
 - "test.js"
+engines:
+  duplication:
+    enabled: true
+    config:
+      languages:
+      - ruby
+      - javascript
