@@ -21,8 +21,12 @@ var delaysqs = function (sqs, queueUrl, messageCallback, errorCallback) {
 
     var _notifyAndDelete = function (message, next) {
         messageCallback(message.Body);
+        _deleteMessage(message.ReceiptHandle, next);
+    };
+
+    var _deleteMessage = function (receiptHandle, next) {
         sqs.deleteMessage({
-            ReceiptHandle: message.ReceiptHandle
+            ReceiptHandle: receiptHandle
         }, function (err, data) {
             if (err) {
                 errorCallback(err);
@@ -45,14 +49,7 @@ var delaysqs = function (sqs, queueUrl, messageCallback, errorCallback) {
                 next();
             } else {
                 console.info("Message with id %s put back to queue, deleting current instance", data.MessageId);
-                sqs.deleteMessage({
-                    ReceiptHandle: message.ReceiptHandle
-                }, function (err, data) {
-                    if (err) {
-                        errorCallback(err);
-                    }
-                    next();
-                });
+                _deleteMessage(message.ReceiptHandle, next);
             }
         });
     };
