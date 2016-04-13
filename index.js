@@ -1,8 +1,33 @@
 'use strict';
 
+var assert = require('assert');
+var AWS = require('aws-sdk');
+
 var delaysqs = function (sqs, queueUrl, messageCallback, errorCallback) {
 
+    if (!(sqs && (sqs instanceof AWS.SQS))) {
+        throw new Error('Parameter sqs must be an instance of AWS.SQS');
+    }
+
+    if (!(typeof(queueUrl) == 'string')) {
+        throw new Error('Parameter queueUrl must be a string');
+    }
+
+    if (!(typeof(messageCallback) == 'function')) {
+        throw new Error('Parameter queueUrl must be a string');
+    }
+
     var polling = false;
+
+    var _notifyErrorCallback = function (error) {
+        if (typeof(errorCallback) == "function") {
+            errorCallback(error);
+        }
+    };
+
+    var _notifyMessageCallback = function (message) {
+        messageCallback(message);
+    };
 
     var _processMessage = function (message, next) {
         var deliveryTimestamp = (message.MessageAttributes && message.MessageAttributes.deliveryTimestamp) ?
@@ -21,7 +46,7 @@ var delaysqs = function (sqs, queueUrl, messageCallback, errorCallback) {
     };
 
     var _notifyAndDelete = function (message, next) {
-        messageCallback(message.Body);
+        _notifyMessageCallback(message.Body);
         _deleteMessage(message.ReceiptHandle, next);
     };
 
@@ -30,7 +55,7 @@ var delaysqs = function (sqs, queueUrl, messageCallback, errorCallback) {
             ReceiptHandle: receiptHandle
         }, function (err, data) {
             if (err) {
-                errorCallback(err);
+                _notifyErrorCallback(err);
             }
             next();
         });
@@ -46,7 +71,7 @@ var delaysqs = function (sqs, queueUrl, messageCallback, errorCallback) {
             QueueUrl: queueUrl
         }, function (err, data) {
             if (err) {
-                errorCallback(err);
+                _notifyErrorCallback(err);
                 next();
             } else {
                 console.info("Message with id %s put back to queue, deleting current instance", data.MessageId);
@@ -98,7 +123,7 @@ var delaysqs = function (sqs, queueUrl, messageCallback, errorCallback) {
             }, function (err, data) {
                 if (err) {
                     console.warn("An error occurred while retrieving messages");
-                    errorCallback(err);
+                    _notifyErrorCallback(err);
                     process.nextTick(_pollQueueForMessages);
                 } else {
                     if (data.Messages) {

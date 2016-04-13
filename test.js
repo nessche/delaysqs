@@ -2,6 +2,7 @@ var chai = require('chai');
 var expect = chai.expect;
 var sinon = require('sinon');
 var sinonChai = require('sinon-chai');
+var AWS = require('aws-sdk');
 
 chai.use(sinonChai);
 
@@ -38,8 +39,35 @@ describe("delaysqs", function () {
     beforeEach(function () {
         messageCallback = sinon.spy();
         errorCallback = sinon.spy();
-        sqs = {};
+        sqs = new AWS.SQS();
         now = Math.round(new Date().getTime() / 1000);
+    });
+
+    describe("delaysqs", function () {
+
+        it("should throw when the sqs prameter is null/undefined", function () {
+            expect(function () { delaysqs(null, queueUrl, messageCallback, errorCallback)}).to.throw(Error);
+        });
+
+        it("should throw when the sqs parameter is not an instance of AWS.SQS", function () {
+            expect(function () { delaysqs("A string is not the right type", queueUrl, messageCallback, errorCallback)}).to.throw(Error);
+        });
+
+        it("should throw when the queueUrl is null/undefined", function () {
+            expect(function () { delaysqs(sqs, null, messageCallback, errorCallback)}).to.throw(Error);
+        });
+
+        it("should throw when the queueUrl is not a string", function () {
+            expect(function () { delaysqs(sqs, 42, messageCallback, errorCallback)}).to.throw(Error);
+        });
+
+        it("should throw when messageCallback is null/undefined", function () {
+            expect(function () { delaysqs(sqs, queueUrl, null, errorCallback)}).to.throw(Error);
+        });
+
+        it("should throw when messageCallback is not a function", function () {
+            expect(function () { delaysqs(sqs, queueUrl, "A string is not a function", errorCallback)}).to.throw(Error);
+        });
     });
 
     describe("startPolling", function() {
@@ -86,6 +114,17 @@ describe("delaysqs", function () {
             }, 400)
 
         });
+
+        it('should not throw if error callback is not defined', function () {
+            sqs.receiveMessage = sinon.stub().yields("it's an error", null);
+            var delayer = delaysqs(sqs, queueUrl, messageCallback);
+            delayer.startPolling();
+
+            process.nextTick(function () {
+                delayer.stopPolling();
+                done();
+            });
+        })
 
 
     });
