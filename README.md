@@ -88,9 +88,6 @@ function (message) {
 
 delayer.startPolling();
 
-
-
-
 ``` 
 
 
