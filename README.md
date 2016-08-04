@@ -1,3 +1,5 @@
+[![npm version](https://badge.fury.io/js/delaysqs.svg)](https://badge.fury.io/js/delaysqs)[![Build Status](https://travis-ci.org/nessche/delaysqs.svg?branch=master)](https://travis-ci.org/nessche/delaysqs)[![Test Coverage](https://codeclimate.com/github/nessche/delaysqs/badges/coverage.svg)](https://codeclimate.com/github/nessche/delaysqs/coverage)
+
 # delaysqs
 A simple node module to extend the SQS delay over the 15 minutes hard-limit imposed by Amazon. This is done by effectively
 reading and relaying the message at 15-minute intervals until the remaining delay time is below the 15-minute limit.
