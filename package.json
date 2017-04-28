@@ -23,7 +23,7 @@
     "aws-sdk": "^2.3.3"
   },
   "devDependencies": {
-    "aws-sdk": "^2.3.3",
+    "aws-sdk": "^2.47.0",
     "chai": "^3.5.0",
     "istanbul": "^0.4.3",
     "mocha": "^3.0.1",
